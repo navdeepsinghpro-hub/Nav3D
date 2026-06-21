@@ -6,6 +6,7 @@ from app.models.project import Project
 from app.schemas.project import ProjectCreate
 from app.auth.dependencies import get_current_user
 from fastapi import UploadFile, File
+import os
 
 router = APIRouter()
 
@@ -114,9 +115,27 @@ async def upload_file(
     project_id: int,
     file: UploadFile = File(...)
 ):
+    upload_dir = "uploads"
+
+    os.makedirs(
+        upload_dir,
+        exist_ok=True
+    )
+
+    file_path = os.path.join(
+        upload_dir,
+        file.filename
+    )
+
+    with open(file_path, "wb") as buffer:
+        buffer.write(
+            await file.read()
+        )
+
     return {
+        "message": "File saved",
         "filename": file.filename,
-        "project_id": project_id
+        "path": file_path
     }
 
     return {
