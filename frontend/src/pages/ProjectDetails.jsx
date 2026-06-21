@@ -106,11 +106,22 @@ const [files, setFiles] = useState([]);
 
           <ul>
             {files.map((file, index) => (
-             <li key={index}>
-                📄 {file}
-            </li>
-                ))}
-          </ul>
+                <li
+                key={index}
+                className="mb-6"
+                >
+                <img
+                    src={`http://127.0.0.1:8000/uploads/${file}`}
+                    alt={file}
+                    className="w-40 rounded border"
+                />
+
+                <p className="mt-2">
+                    {file}
+                </p>
+                </li>
+            ))}
+            </ul>
         </div>
       </div>
     </div>

@@ -7,10 +7,17 @@ from app.routes.auth import router as auth_router
 from app.routes.user import router as user_router
 from app.models.project import Project
 from app.routes.projects import router as projects_router
+from fastapi.staticfiles import StaticFiles
 
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
+
+app.mount(
+    "/uploads",
+    StaticFiles(directory="uploads"),
+    name="uploads"
+)
 
 app.add_middleware(
     CORSMiddleware,
