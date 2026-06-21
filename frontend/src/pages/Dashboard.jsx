@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 function Dashboard() {
   const [user, setUser] = useState(null);
+  const [projects, setProjects] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -24,8 +25,16 @@ function Dashboard() {
           }
         );
 
-        const data = await response.json();
-        setUser(data);
+       const data = await response.json();
+setUser(data);
+
+const projectsResponse = await fetch(
+  "http://127.0.0.1:8000/projects"
+);
+
+const projectsData = await projectsResponse.json();
+
+setProjects(projectsData);
       } catch (error) {
         console.error(error);
       }
@@ -58,6 +67,18 @@ function Dashboard() {
           <p className="mb-6">
             Email: {user.email}
           </p>
+
+          <h3 className="text-xl mt-6 mb-3">
+            My Projects
+          </h3>
+
+          <ul>
+            {projects.map((project) => (
+              <li key={project.id}>
+                • {project.name}
+              </li>
+            ))}
+          </ul>
 
           <button
             onClick={handleLogout}

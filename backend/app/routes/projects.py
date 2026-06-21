@@ -7,6 +7,13 @@ from app.schemas.project import ProjectCreate
 
 router = APIRouter()
 
+@router.get("/projects")
+def get_projects(
+    db: Session = Depends(get_db)
+):
+    projects = db.query(Project).all()
+
+    return projects
 
 @router.post("/projects")
 def create_project(
@@ -27,3 +34,4 @@ def create_project(
         "project_id": new_project.id,
         "name": new_project.name
     }
+
