@@ -5,6 +5,7 @@ from app.database import get_db
 from app.models.project import Project
 from app.schemas.project import ProjectCreate
 from app.auth.dependencies import get_current_user
+from fastapi import UploadFile, File
 
 router = APIRouter()
 
@@ -89,6 +90,34 @@ def delete_project(
 
     db.delete(project)
     db.commit()
+
+@router.get("/projects/{project_id}")
+def get_project(
+    project_id: int,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user)
+):
+    project = db.query(Project).filter(
+        Project.id == project_id,
+        Project.owner_id == current_user["user_id"]
+    ).first()
+
+    if not project:
+        return {
+            "message": "Project not found"
+        }
+
+    return project
+
+@router.post("/projects/{project_id}/upload")
+async def upload_file(
+    project_id: int,
+    file: UploadFile = File(...)
+):
+    return {
+        "filename": file.filename,
+        "project_id": project_id
+    }
 
     return {
         "message": "Project deleted"

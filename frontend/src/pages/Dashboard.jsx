@@ -195,8 +195,13 @@ const renameProject = async (id) => {
                 key={project.id}
                 className="flex items-center gap-3 mb-2"
               >
-                <span>
-                  • {project.name}
+                <span
+                    className="cursor-pointer underline"
+                    onClick={() =>
+                    navigate(`/projects/${project.id}`)
+                 }
+                   >
+                 • {project.name}
                 </span>
 
               <button
