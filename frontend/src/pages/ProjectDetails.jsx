@@ -130,10 +130,10 @@ const deleteFile = async (filename) => {
                 className="mb-6"
                 >
                 <img
-                    src={`http://127.0.0.1:8000/uploads/${file}`}
+                    src={`http://127.0.0.1:8000/uploads/project_${id}/${file}`}
                     alt={file}
                     className="w-40 rounded border"
-                />
+                    />
 
                 <div className="flex items-center gap-3 mt-2">
                 <p>{file}</p>

@@ -91,6 +91,9 @@ def delete_project(
 
     db.delete(project)
     db.commit()
+    return {
+    "message": "Project deleted"
+}
 
 @router.get("/projects/{project_id}")
 def get_project(
@@ -115,7 +118,10 @@ async def upload_file(
     project_id: int,
     file: UploadFile = File(...)
 ):
-    upload_dir = "uploads"
+    upload_dir = os.path.join(
+        "uploads",
+        f"project_{project_id}"
+    )
 
     os.makedirs(
         upload_dir,
@@ -142,10 +148,13 @@ async def upload_file(
 def get_project_files(
     project_id: int
 ):
-    upload_dir = "uploads"
+    upload_dir = os.path.join(
+    "uploads",
+    f"project_{project_id}"
+)
 
     if not os.path.exists(upload_dir):
-        return []
+     return []
 
     files = os.listdir(upload_dir)
 
