@@ -5,6 +5,8 @@ from app.database import Base, engine
 from app.models.user import User
 from app.routes.auth import router as auth_router
 from app.routes.user import router as user_router
+from app.models.project import Project
+from app.routes.projects import router as projects_router
 
 Base.metadata.create_all(bind=engine)
 
@@ -22,6 +24,7 @@ app.add_middleware(
 
 app.include_router(auth_router)
 app.include_router(user_router)
+app.include_router(projects_router)
 
 
 @app.get("/")
