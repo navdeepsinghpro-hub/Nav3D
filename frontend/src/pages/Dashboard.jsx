@@ -1,11 +1,74 @@
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 function Dashboard() {
+  const [user, setUser] = useState(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        navigate("/login");
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          "http://127.0.0.1:8000/me",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        const data = await response.json();
+        setUser(data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchUser();
+  }, [navigate]);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    navigate("/login");
+  };
+
   return (
     <div className="min-h-screen bg-black text-white p-10">
-      <h1 className="text-5xl font-bold">Dashboard</h1>
+      <h1 className="text-4xl font-bold mb-6">
+        Dashboard
+      </h1>
 
-      <p className="mt-4 text-gray-400">
-        Welcome to Nav3D
-      </p>
+      {user ? (
+        <div className="border border-gray-800 rounded-xl p-6">
+          <h2 className="text-2xl mb-4">
+            Welcome 👋
+          </h2>
+
+          <p className="mb-2">
+            User ID: {user.user_id}
+          </p>
+
+          <p className="mb-6">
+            Email: {user.email}
+          </p>
+
+          <button
+            onClick={handleLogout}
+            className="bg-white text-black px-4 py-2 rounded"
+          >
+            Logout
+          </button>
+        </div>
+      ) : (
+        <p>Loading...</p>
+      )}
     </div>
   );
 }
