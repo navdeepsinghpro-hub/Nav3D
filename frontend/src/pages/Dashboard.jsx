@@ -30,7 +30,12 @@ function Dashboard() {
 setUser(data);
 
 const projectsResponse = await fetch(
-  "http://127.0.0.1:8000/projects"
+  "http://127.0.0.1:8000/projects",
+  {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  }
 );
 
 const projectsData = await projectsResponse.json();
@@ -57,9 +62,10 @@ setProjects(projectsData);
       "http://127.0.0.1:8000/projects",
       {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+       headers: {
+  "Content-Type": "application/json",
+  Authorization: `Bearer ${localStorage.getItem("token")}`,
+},
         body: JSON.stringify({
           name: projectName,
         }),
@@ -85,11 +91,14 @@ setProjects(projectsData);
 const deleteProject = async (id) => {
   try {
     await fetch(
-      `http://127.0.0.1:8000/projects/${id}`,
-      {
-        method: "DELETE",
-      }
-    );
+  `http://127.0.0.1:8000/projects/${id}`,
+  {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  }
+);
 
     setProjects(
       projects.filter(
@@ -114,9 +123,9 @@ const renameProject = async (id) => {
       {
         method: "PUT",
         headers: {
-          "Content-Type":
-            "application/json",
-        },
+          "Content-Type": "application/json",
+           Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         body: JSON.stringify({
           name: newName,
         }),
