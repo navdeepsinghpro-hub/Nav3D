@@ -1,22 +1,73 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 function Login() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const navigate = useNavigate();
+
+  const handleLogin = async () => {
+    try {
+      const response = await fetch(
+        "http://127.0.0.1:8000/login",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email,
+            password,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (data.token) {
+        localStorage.setItem("token", data.token);
+        alert("Login successful!");
+        navigate("/dashboard");
+      } else {
+        alert(data.message);
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Login failed");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-black text-white flex items-center justify-center">
       <div className="w-full max-w-md border border-gray-800 rounded-xl p-8">
-        <h1 className="text-3xl font-bold mb-6">Login</h1>
+        <h1 className="text-3xl font-bold mb-6">
+          Login
+        </h1>
 
         <input
           type="email"
           placeholder="Email"
+          value={email}
+          onChange={(e) =>
+            setEmail(e.target.value)
+          }
           className="w-full p-3 mb-4 bg-gray-900 rounded"
         />
 
         <input
           type="password"
           placeholder="Password"
+          value={password}
+          onChange={(e) =>
+            setPassword(e.target.value)
+          }
           className="w-full p-3 mb-4 bg-gray-900 rounded"
         />
 
-        <button className="w-full bg-white text-black p-3 rounded">
+        <button
+          onClick={handleLogin}
+          className="w-full bg-white text-black p-3 rounded"
+        >
           Login
         </button>
       </div>
