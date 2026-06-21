@@ -67,6 +67,25 @@ const [files, setFiles] = useState([]);
     );
   }
 
+const deleteFile = async (filename) => {
+  try {
+    await fetch(
+      `http://127.0.0.1:8000/files/${filename}`,
+      {
+        method: "DELETE",
+      }
+    );
+
+    setFiles(
+      files.filter(
+        (file) => file !== filename
+      )
+    );
+  } catch (error) {
+    console.error(error);
+  }
+};
+
   return (
     <div className="min-h-screen bg-black text-white p-10">
       <h1 className="text-4xl font-bold mb-6">
@@ -116,9 +135,18 @@ const [files, setFiles] = useState([]);
                     className="w-40 rounded border"
                 />
 
-                <p className="mt-2">
-                    {file}
-                </p>
+                <div className="flex items-center gap-3 mt-2">
+                <p>{file}</p>
+
+                <button
+                    onClick={() =>
+                    deleteFile(file)
+                    }
+                    className="bg-red-600 px-3 py-1 rounded"
+                >
+                    Delete
+                </button>
+                </div>
                 </li>
             ))}
             </ul>

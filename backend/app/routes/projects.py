@@ -154,3 +154,23 @@ def get_project_files(
     return {
         "message": "Project deleted"
     }
+
+@router.delete("/files/{filename}")
+def delete_file(filename: str):
+    import os
+
+    file_path = os.path.join(
+        "uploads",
+        filename
+    )
+
+    if not os.path.exists(file_path):
+        return {
+            "message": "File not found"
+        }
+
+    os.remove(file_path)
+
+    return {
+        "message": "File deleted"
+    }
