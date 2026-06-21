@@ -5,6 +5,7 @@ from app.models.schemas import UserRegister, UserLogin
 from app.models.user import User
 from app.database import get_db
 from app.auth.security import hash_password, verify_password
+from app.auth.jwt_handler import create_access_token
 
 
 router = APIRouter()
@@ -60,8 +61,12 @@ def login(
             "message": "Incorrect password"
         }
 
+    token = create_access_token({
+    "user_id": existing_user.id,
+    "email": existing_user.email
+})
+
     return {
-        "message": "Login successful",
-        "user_id": existing_user.id,
-        "username": existing_user.username
-    }
+    "message": "Login successful",
+    "token": token
+}
