@@ -139,6 +139,17 @@ const deleteFile = async (filename) => {
                 <p>{file}</p>
 
                 <button
+                onClick={() =>
+                    window.open(
+                    `http://127.0.0.1:8000/projects/${id}/download/${file}`
+                    )
+                }
+                className="bg-green-600 px-3 py-1 rounded"
+                >
+                Download
+                </button>
+
+                <button
                     onClick={() =>
                     deleteFile(file)
                     }

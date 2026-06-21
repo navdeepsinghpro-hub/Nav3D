@@ -7,6 +7,7 @@ from app.schemas.project import ProjectCreate
 from app.auth.dependencies import get_current_user
 from fastapi import UploadFile, File
 import os
+from fastapi.responses import FileResponse
 
 router = APIRouter()
 
@@ -183,3 +184,26 @@ def delete_file(filename: str):
     return {
         "message": "File deleted"
     }
+
+@router.get(
+    "/projects/{project_id}/download/{filename}"
+)
+def download_file(
+    project_id: int,
+    filename: str
+):
+    file_path = os.path.join(
+        "uploads",
+        f"project_{project_id}",
+        filename
+    )
+
+    if not os.path.exists(file_path):
+        return {
+            "message": "File not found"
+        }
+
+    return FileResponse(
+        file_path,
+        filename=filename
+    )
