@@ -4,27 +4,35 @@ import { useParams } from "react-router-dom";
 function ProjectDetails() {
   const { id } = useParams();
 
-  const [project, setProject] = useState(null);
-  const [file, setFile] = useState(null);
+const [project, setProject] = useState(null);
+const [file, setFile] = useState(null);
+const [files, setFiles] = useState([]);
 
   useEffect(() => {
-    const fetchProject = async () => {
-      const token = localStorage.getItem("token");
+ const fetchProject = async () => {
+  const token = localStorage.getItem("token");
 
-      const response = await fetch(
-        `http://127.0.0.1:8000/projects/${id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+  const response = await fetch(
+    `http://127.0.0.1:8000/projects/${id}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
 
-      const data = await response.json();
+  const data = await response.json();
 
-      setProject(data);
-    };
+  setProject(data);
 
+  const filesResponse = await fetch(
+    `http://127.0.0.1:8000/projects/${id}/files`
+  );
+
+  const filesData = await filesResponse.json();
+
+  setFiles(filesData);
+};
     fetchProject();
   }, [id]);
 
@@ -48,6 +56,7 @@ function ProjectDetails() {
     console.log(data);
 
     alert("File uploaded!");
+    window.location.reload();
   };
 
   if (!project) {
@@ -91,6 +100,17 @@ function ProjectDetails() {
           >
             Upload
           </button>
+          <h2 className="text-xl mt-6 mb-3">
+             Uploaded Files
+          </h2>
+
+          <ul>
+            {files.map((file, index) => (
+             <li key={index}>
+                📄 {file}
+            </li>
+                ))}
+          </ul>
         </div>
       </div>
     </div>

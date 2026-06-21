@@ -138,6 +138,19 @@ async def upload_file(
         "path": file_path
     }
 
+@router.get("/projects/{project_id}/files")
+def get_project_files(
+    project_id: int
+):
+    upload_dir = "uploads"
+
+    if not os.path.exists(upload_dir):
+        return []
+
+    files = os.listdir(upload_dir)
+
+    return files
+
     return {
         "message": "Project deleted"
     }
