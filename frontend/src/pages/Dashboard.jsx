@@ -82,6 +82,62 @@ setProjects(projectsData);
   }
 };
 
+const deleteProject = async (id) => {
+  try {
+    await fetch(
+      `http://127.0.0.1:8000/projects/${id}`,
+      {
+        method: "DELETE",
+      }
+    );
+
+    setProjects(
+      projects.filter(
+        (project) => project.id !== id
+      )
+    );
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+const renameProject = async (id) => {
+  const newName = prompt(
+    "Enter new project name"
+  );
+
+  if (!newName) return;
+
+  try {
+    await fetch(
+      `http://127.0.0.1:8000/projects/${id}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type":
+            "application/json",
+        },
+        body: JSON.stringify({
+          name: newName,
+        }),
+      }
+    );
+
+    setProjects(
+      projects.map((project) =>
+        project.id === id
+          ? {
+              ...project,
+              name: newName,
+            }
+          : project
+      )
+    );
+  } catch (error) {
+    console.error(error);
+  }
+};
+
   return (
     <div className="min-h-screen bg-black text-white p-10">
       <h1 className="text-4xl font-bold mb-6">
@@ -126,8 +182,32 @@ setProjects(projectsData);
 
           <ul>
             {projects.map((project) => (
-              <li key={project.id}>
-                • {project.name}
+              <li
+                key={project.id}
+                className="flex items-center gap-3 mb-2"
+              >
+                <span>
+                  • {project.name}
+                </span>
+
+              <button
+                onClick={() =>
+                    renameProject(project.id)
+                   }
+                    className="bg-blue-600 px-3 py-1 rounded"
+                  >
+                    Rename
+                  </button>
+
+                <button
+                  onClick={() =>
+                    deleteProject(project.id)
+                  }
+                  className="bg-red-600 px-3 py-1 rounded"
+                >
+                  Delete
+                </button>
+                
               </li>
             ))}
           </ul>

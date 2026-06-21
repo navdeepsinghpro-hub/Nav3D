@@ -15,6 +15,54 @@ def get_projects(
 
     return projects
 
+@router.delete("/projects/{project_id}")
+def delete_project(
+    project_id: int,
+    db: Session = Depends(get_db)
+):
+    project = db.query(Project).filter(
+        Project.id == project_id
+    ).first()
+
+    if not project:
+        return {
+            "message": "Project not found"
+        }
+
+    db.delete(project)
+    db.commit()
+
+    return {
+        "message": "Project deleted"
+    }
+
+@router.put("/projects/{project_id}")
+def update_project(
+    project_id: int,
+    project: ProjectCreate,
+    db: Session = Depends(get_db)
+):
+    existing_project = db.query(
+        Project
+    ).filter(
+        Project.id == project_id
+    ).first()
+
+    if not existing_project:
+        return {
+            "message": "Project not found"
+        }
+
+    existing_project.name = project.name
+
+    db.commit()
+    db.refresh(existing_project)
+
+    return {
+        "message": "Project updated",
+        "project": existing_project
+    }
+
 @router.post("/projects")
 def create_project(
     project: ProjectCreate,
