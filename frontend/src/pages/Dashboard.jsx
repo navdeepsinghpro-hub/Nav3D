@@ -42,12 +42,7 @@ const projectsResponse = await fetch(
 
 const projectsData = await projectsResponse.json();
 
-setProjects(
-  projectsData.map((project) => ({
-    ...project,
-    file_count: 0,
-  }))
-);
+setProjects(projectsData);
       } catch (error) {
         console.error(error);
       }

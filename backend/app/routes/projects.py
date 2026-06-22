@@ -18,10 +18,34 @@ def get_projects(
     current_user=Depends(get_current_user)
 ):
     projects = db.query(Project).filter(
-        Project.owner_id == current_user["user_id"]
+    Project.owner_id == current_user["user_id"]
     ).all()
 
-    return projects
+    result = []
+
+    for project in projects:
+            upload_dir = os.path.join(
+                "uploads",
+                f"project_{project.id}"
+            )
+
+            file_count = 0
+
+            if os.path.exists(upload_dir):
+                file_count = len(
+                    os.listdir(upload_dir)
+                )
+
+            result.append(
+                {
+                    "id": project.id,
+                    "name": project.name,
+                    "owner_id": project.owner_id,
+                    "file_count": file_count
+                }
+            )
+
+    return result
 
 
 @router.post("/projects")
