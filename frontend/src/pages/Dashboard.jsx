@@ -6,6 +6,7 @@ function Dashboard() {
   const [projects, setProjects] = useState([]);
   const [projectName, setProjectName] = useState("");
   const [search, setSearch] = useState("");
+  const [sortOrder, setSortOrder] = useState("asc");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -192,14 +193,19 @@ const renameProject = async (id) => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {projects
-            .filter((project) =>
-              project.name
-                .toLowerCase()
-                .includes(
-                  search.toLowerCase()
-                )
-            )
-            .map((project) => (
+          .filter((project) =>
+            project.name
+              .toLowerCase()
+              .includes(
+                search.toLowerCase()
+              )
+          )
+          .sort((a, b) =>
+            sortOrder === "asc"
+              ? a.name.localeCompare(b.name)
+              : b.name.localeCompare(a.name)
+          )
+          .map((project) => (
 
             <div
               key={project.id}
@@ -243,6 +249,24 @@ const renameProject = async (id) => {
               </div>
             </div>
           ))}
+        </div>
+
+        <div className="mb-4">
+          <select
+            value={sortOrder}
+            onChange={(e) =>
+              setSortOrder(e.target.value)
+            }
+            className="bg-gray-900 border border-gray-700 p-3 rounded"
+          >
+            <option value="asc">
+              A → Z
+            </option>
+
+            <option value="desc">
+              Z → A
+            </option>
+          </select>
         </div>
 
         <div className="mb-6">
