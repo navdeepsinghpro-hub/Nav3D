@@ -42,7 +42,12 @@ const projectsResponse = await fetch(
 
 const projectsData = await projectsResponse.json();
 
-setProjects(projectsData);
+setProjects(
+  projectsData.map((project) => ({
+    ...project,
+    file_count: 0,
+  }))
+);
       } catch (error) {
         console.error(error);
       }
@@ -214,6 +219,14 @@ const renameProject = async (id) => {
               <h3 className="text-xl font-bold mb-2">
                 📁 {project.name}
               </h3>
+
+              <p className="text-gray-400 text-sm mb-2">
+                Project ID: {project.id}
+              </p>
+
+              <p className="text-blue-400 text-sm mb-4">
+                📄 Files: {project.file_count || 0}
+              </p>
 
               <p className="text-gray-400 mb-4">
                 Project ID: {project.id}
