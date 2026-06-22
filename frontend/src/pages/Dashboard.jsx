@@ -5,6 +5,7 @@ function Dashboard() {
   const [user, setUser] = useState(null);
   const [projects, setProjects] = useState([]);
   const [projectName, setProjectName] = useState("");
+  const [search, setSearch] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -190,50 +191,71 @@ const renameProject = async (id) => {
           </h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-  {projects.map((project) => (
-    <div
-      key={project.id}
-      className="border border-gray-700 rounded-xl p-5 bg-gray-900"
-    >
-      <h3 className="text-xl font-bold mb-2">
-        📁 {project.name}
-      </h3>
+          {projects
+            .filter((project) =>
+              project.name
+                .toLowerCase()
+                .includes(
+                  search.toLowerCase()
+                )
+            )
+            .map((project) => (
 
-      <p className="text-gray-400 mb-4">
-        Project ID: {project.id}
-      </p>
+            <div
+              key={project.id}
+              className="border border-gray-700 rounded-xl p-5 bg-gray-900"
+            >
+              <h3 className="text-xl font-bold mb-2">
+                📁 {project.name}
+              </h3>
 
-      <div className="flex gap-2 flex-wrap">
-        <button
-          onClick={() =>
-            navigate(`/project/${project.id}`)
-          }
-          className="bg-green-600 px-3 py-1 rounded"
-        >
-          Open
-        </button>
+              <p className="text-gray-400 mb-4">
+                Project ID: {project.id}
+              </p>
 
-        <button
-          onClick={() =>
-            renameProject(project.id)
-          }
-          className="bg-blue-600 px-3 py-1 rounded"
-        >
-          Rename
-        </button>
+              <div className="flex gap-2 flex-wrap">
+                <button
+                  onClick={() =>
+                    navigate(`/project/${project.id}`)
+                  }
+                  className="bg-green-600 px-3 py-1 rounded"
+                >
+                  Open
+                </button>
 
-        <button
-          onClick={() =>
-            deleteProject(project.id)
-          }
-          className="bg-red-600 px-3 py-1 rounded"
-        >
-          Delete
-        </button>
-      </div>
-    </div>
-  ))}
-</div>
+                <button
+                  onClick={() =>
+                    renameProject(project.id)
+                  }
+                  className="bg-blue-600 px-3 py-1 rounded"
+                >
+                  Rename
+                </button>
+
+                <button
+                  onClick={() =>
+                    deleteProject(project.id)
+                  }
+                  className="bg-red-600 px-3 py-1 rounded"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="mb-6">
+          <input
+            type="text"
+            placeholder="Search Projects..."
+            value={search}
+            onChange={(e) =>
+              setSearch(e.target.value)
+            }
+            className="bg-gray-900 border border-gray-700 p-3 rounded w-full"
+          />
+        </div>
 
           <button
             onClick={handleLogout}
