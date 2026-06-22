@@ -150,6 +150,31 @@ def get_project_files(
     project_id: int
 ):
     upload_dir = os.path.join(
+        "uploads",
+        f"project_{project_id}"
+    )
+
+    if not os.path.exists(upload_dir):
+        return []
+
+    result = []
+
+    for filename in os.listdir(upload_dir):
+        file_path = os.path.join(
+            upload_dir,
+            filename
+        )
+
+        result.append(
+            {
+                "name": filename,
+                "size": os.path.getsize(file_path)
+            }
+        )
+
+    return result
+
+    upload_dir = os.path.join(
     "uploads",
     f"project_{project_id}"
 )

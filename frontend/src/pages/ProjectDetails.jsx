@@ -78,7 +78,7 @@ const deleteFile = async (filename) => {
 
     setFiles(
       files.filter(
-        (file) => file !== filename
+        (file) => file.name !== filename
       )
     );
   } catch (error) {
@@ -130,33 +130,39 @@ const deleteFile = async (filename) => {
                 className="mb-6"
                 >
                 <img
-                    src={`http://127.0.0.1:8000/uploads/project_${id}/${file}`}
-                    alt={file}
+                    src={`http://127.0.0.1:8000/uploads/project_${id}/${file.name}`}
+                    alt={file.name}
                     className="w-40 rounded border"
-                    />
+                />
 
                 <div className="flex items-center gap-3 mt-2">
-                <p>{file}</p>
+                    <div>
+                    <p>{file.name}</p>
 
-                <button
-                onClick={() =>
-                    window.open(
-                    `http://127.0.0.1:8000/projects/${id}/download/${file}`
-                    )
-                }
-                className="bg-green-600 px-3 py-1 rounded"
-                >
-                Download
-                </button>
+                    <p className="text-sm text-gray-400">
+                        {(file.size / 1024).toFixed(2)} KB
+                    </p>
+                    </div>
 
-                <button
+                    <button
                     onClick={() =>
-                    deleteFile(file)
+                        window.open(
+                        `http://127.0.0.1:8000/projects/${id}/download/${file.name}`
+                        )
+                    }
+                    className="bg-green-600 px-3 py-1 rounded"
+                    >
+                    Download
+                    </button>
+
+                    <button
+                    onClick={() =>
+                        deleteFile(file.name)
                     }
                     className="bg-red-600 px-3 py-1 rounded"
-                >
+                    >
                     Delete
-                </button>
+                    </button>
                 </div>
                 </li>
             ))}
