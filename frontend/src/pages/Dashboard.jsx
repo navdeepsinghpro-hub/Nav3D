@@ -189,42 +189,51 @@ const renameProject = async (id) => {
             My Projects
           </h3>
 
-          <ul>
-            {projects.map((project) => (
-              <li
-                key={project.id}
-                className="flex items-center gap-3 mb-2"
-              >
-                <span
-                    className="cursor-pointer underline"
-                    onClick={() =>
-                    navigate(`/projects/${project.id}`)
-                 }
-                   >
-                 • {project.name}
-                </span>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+  {projects.map((project) => (
+    <div
+      key={project.id}
+      className="border border-gray-700 rounded-xl p-5 bg-gray-900"
+    >
+      <h3 className="text-xl font-bold mb-2">
+        📁 {project.name}
+      </h3>
 
-              <button
-                onClick={() =>
-                    renameProject(project.id)
-                   }
-                    className="bg-blue-600 px-3 py-1 rounded"
-                  >
-                    Rename
-                  </button>
+      <p className="text-gray-400 mb-4">
+        Project ID: {project.id}
+      </p>
 
-                <button
-                  onClick={() =>
-                    deleteProject(project.id)
-                  }
-                  className="bg-red-600 px-3 py-1 rounded"
-                >
-                  Delete
-                </button>
-                
-              </li>
-            ))}
-          </ul>
+      <div className="flex gap-2 flex-wrap">
+        <button
+          onClick={() =>
+            navigate(`/project/${project.id}`)
+          }
+          className="bg-green-600 px-3 py-1 rounded"
+        >
+          Open
+        </button>
+
+        <button
+          onClick={() =>
+            renameProject(project.id)
+          }
+          className="bg-blue-600 px-3 py-1 rounded"
+        >
+          Rename
+        </button>
+
+        <button
+          onClick={() =>
+            deleteProject(project.id)
+          }
+          className="bg-red-600 px-3 py-1 rounded"
+        >
+          Delete
+        </button>
+      </div>
+    </div>
+  ))}
+</div>
 
           <button
             onClick={handleLogout}
