@@ -5,9 +5,20 @@ function Dashboard() {
   const [user, setUser] = useState(null);
   const [projects, setProjects] = useState([]);
   const [projectName, setProjectName] = useState("");
-  const [search, setSearch] = useState("");
+  const [description, setDescription] = useState("");
   const [sortOrder, setSortOrder] = useState("asc");
+  const totalProjects = projects.length;
+
+  const totalFiles = projects.reduce(
+    (sum, project) =>
+      sum + (project.file_count || 0),
+    0
+  );
+  const [search, setSearch] = useState("");
   const navigate = useNavigate();
+  const [editingProject, setEditingProject] = useState(null);
+  const [editName, setEditName] = useState("");
+  const [editDescription, setEditDescription] = useState("");
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -70,21 +81,25 @@ setProjects(projectsData);
 },
         body: JSON.stringify({
           name: projectName,
+          description: description,
         }),
       }
     );
 
-    const newProject = await response.json();
+const newProject = await response.json();
 
-    setProjects([
-      ...projects,
-      {
-        id: newProject.project_id,
-        name: newProject.name,
-      },
-    ]);
+setProjects([
+  ...projects,
+  {
+    id: newProject.project_id,
+    name: newProject.name,
+    description: description,
+    file_count: 0,
+  },
+]);
 
     setProjectName("");
+    setDescription("");
   } catch (error) {
     console.error(error);
   }
@@ -112,38 +127,42 @@ const deleteProject = async (id) => {
   }
 };
 
-const renameProject = async (id) => {
-  const newName = prompt(
-    "Enter new project name"
-  );
+const openEditProject = (project) => {
+  setEditingProject(project.id);
+  setEditName(project.name);
+  setEditDescription(project.description || "");
+};
 
-  if (!newName) return;
-
+const saveProjectEdit = async () => {
   try {
     await fetch(
-      `http://127.0.0.1:8000/projects/${id}`,
+      `http://127.0.0.1:8000/projects/${editingProject}`,
       {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-           Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
         body: JSON.stringify({
-          name: newName,
+          name: editName,
+          description: editDescription,
         }),
       }
     );
 
     setProjects(
       projects.map((project) =>
-        project.id === id
+        project.id === editingProject
           ? {
               ...project,
-              name: newName,
+              name: editName,
+              description: editDescription,
             }
           : project
       )
     );
+
+    setEditingProject(null);
   } catch (error) {
     console.error(error);
   }
@@ -179,6 +198,24 @@ const renameProject = async (id) => {
             className="bg-gray-900 p-3 rounded mr-3"
           />
 
+          <input
+            type="text"
+            placeholder="Project Description"
+            value={description}
+            onChange={(e) =>
+              setDescription(e.target.value)
+            }
+          />
+
+          <textarea
+            value={description}
+            onChange={(e) =>
+              setDescription(e.target.value)
+            }
+            placeholder="Project description"
+            className="w-full p-3 rounded text-black mt-3"
+          />
+
           <button
             onClick={createProject}
             className="bg-white text-black px-4 py-3 rounded"
@@ -186,6 +223,28 @@ const renameProject = async (id) => {
             Create Project
           </button>
         </div>
+
+            <div className="grid grid-cols-2 gap-4 mb-6">
+              <div className="bg-gray-900 p-5 rounded-xl">
+                <h2 className="text-lg font-bold">
+                  📁 Total Projects
+                </h2>
+
+                <p className="text-3xl mt-2">
+                  {totalProjects}
+                </p>
+              </div>
+
+              <div className="bg-gray-900 p-5 rounded-xl">
+                <h2 className="text-lg font-bold">
+                  📄 Total Files
+                </h2>
+
+                <p className="text-3xl mt-2">
+                  {totalFiles}
+                </p>
+              </div>
+            </div>
 
           <h3 className="text-xl mt-6 mb-3">
             My Projects
@@ -215,6 +274,10 @@ const renameProject = async (id) => {
                 📁 {project.name}
               </h3>
 
+              <p className="text-gray-400 mt-2">
+                {project.description}
+              </p>
+
               <p className="text-gray-400 text-sm mb-2">
                 Project ID: {project.id}
               </p>
@@ -223,27 +286,53 @@ const renameProject = async (id) => {
                 📄 Files: {project.file_count || 0}
               </p>
 
-              <p className="text-gray-400 mb-4">
-                Project ID: {project.id}
-              </p>
-
               <div className="flex gap-2 flex-wrap">
                 <button
                   onClick={() =>
-                    navigate(`/project/${project.id}`)
+                    navigate(`/projects/${project.id}`)
                   }
                   className="bg-green-600 px-3 py-1 rounded"
                 >
                   Open
                 </button>
+                  {editingProject === project.id && (
+                    <div className="border border-gray-700 p-4 rounded mt-6">
+                      <h3 className="text-xl mb-3">
+                        Edit Project
+                      </h3>
 
+                      <input
+                        type="text"
+                        value={editName}
+                        onChange={(e) =>
+                          setEditName(e.target.value)
+                        }
+                        className="w-full p-3 rounded text-black mb-3"
+                        placeholder="Project Name"
+                      />
+
+                      <textarea
+                        value={editDescription}
+                        onChange={(e) =>
+                          setEditDescription(e.target.value)
+                        }
+                        className="w-full p-3 rounded text-black mb-3"
+                        placeholder="Project Description"
+                      />
+
+                      <button
+                        onClick={saveProjectEdit}
+                        className="bg-green-600 px-4 py-2 rounded"
+                      >
+                        Save Changes
+                      </button>
+                    </div>
+                  )}
                 <button
-                  onClick={() =>
-                    renameProject(project.id)
-                  }
+                  onClick={() => openEditProject(project)}
                   className="bg-blue-600 px-3 py-1 rounded"
                 >
-                  Rename
+                  Edit
                 </button>
 
                 <button

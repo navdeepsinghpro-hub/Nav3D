@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import axios from "axios";
 
 function ProjectDetails() {
   const { id } = useParams();
@@ -7,6 +8,8 @@ function ProjectDetails() {
 const [project, setProject] = useState(null);
 const [file, setFile] = useState(null);
 const [files, setFiles] = useState([]);
+const [dragging, setDragging] = useState(false);
+const [progress, setProgress] = useState(0);
 
   useEffect(() => {
  const fetchProject = async () => {
@@ -36,24 +39,25 @@ const [files, setFiles] = useState([]);
     fetchProject();
   }, [id]);
 
-  const uploadFile = async () => {
+    const uploadFile = async () => {
     if (!file) return;
 
     const formData = new FormData();
-
     formData.append("file", file);
 
-    const response = await fetch(
+    await axios.post(
       `http://127.0.0.1:8000/projects/${id}/upload`,
+      formData,
       {
-        method: "POST",
-        body: formData,
+        onUploadProgress: (event) => {
+          const percent = Math.round(
+            (event.loaded * 100) / event.total
+          );
+
+          setProgress(percent);
+        },
       }
     );
-
-    const data = await response.json();
-
-    console.log(data);
 
     alert("File uploaded!");
     window.location.reload();
@@ -66,6 +70,23 @@ const [files, setFiles] = useState([]);
       </div>
     );
   }
+
+  const renameFile = async (filename) => {
+  const newName = prompt(
+    "Enter new filename"
+  );
+
+  if (!newName) return;
+
+  await fetch(
+  `http://127.0.0.1:8000/projects/${id}/files/${filename}?new_filename=${newName}`,
+  {
+    method: "PUT",
+  }
+);
+
+  window.location.reload();
+};
 
 const deleteFile = async (filename) => {
   try {
@@ -97,28 +118,89 @@ const deleteFile = async (filename) => {
           Project ID: {project.id}
         </p>
 
-        <p>
-          Project Name: {project.name}
-        </p>
+      <p>
+        Project Name: {project.name?.replace("Name: ", "")}
+      </p>
+
+      <p>
+        Description: {project.description?.replace("Description: ", "")}
+      </p>
 
         <p>
           Owner ID: {project.owner_id}
         </p>
 
-        <div className="mt-6">
+       <div className="mt-6">
+        <div
+          className={`p-8 border-2 border-dashed rounded-xl text-center ${
+            dragging
+              ? "border-blue-500 bg-gray-800"
+              : "border-gray-600"
+          }`}
+          onDragOver={(e) => {
+            e.preventDefault();
+            setDragging(true);
+          }}
+          onDragLeave={() =>
+            setDragging(false)
+          }
+          onDrop={(e) => {
+            e.preventDefault();
+            setDragging(false);
+
+            const droppedFile =
+              e.dataTransfer.files[0];
+
+            if (droppedFile) {
+              setFile(droppedFile);
+            }
+          }}
+        >
+          <p>📁 Drag & Drop File Here</p>
+
+          <p className="text-gray-400 mt-2">
+            or choose manually below
+          </p>
+
           <input
             type="file"
+            className="mt-4"
             onChange={(e) =>
               setFile(e.target.files[0])
             }
           />
 
-          <button
-            onClick={uploadFile}
-            className="bg-white text-black px-4 py-2 rounded ml-3"
-          >
-            Upload
-          </button>
+          {file && (
+            <p className="mt-3 text-green-400">
+              Selected: {file.name}
+            </p>
+          )}
+
+        </div>
+
+        <button
+          onClick={uploadFile}
+          className="bg-white text-black px-4 py-2 rounded mt-4"
+        >
+          Upload
+        </button>
+
+        {progress > 0 && (
+          <div className="mt-4">
+            <div className="w-full bg-gray-700 rounded">
+              <div
+                className="bg-green-500 h-4 rounded"
+                style={{
+                  width: `${progress}%`,
+                }}
+              ></div>
+            </div>
+
+            <p className="mt-1">
+              {progress}%
+            </p>
+          </div>
+        )}
           <h2 className="text-xl mt-6 mb-3">
              Uploaded Files
           </h2>
@@ -156,6 +238,15 @@ const deleteFile = async (filename) => {
                     </button>
 
                     <button
+                      onClick={() =>
+                        renameFile(file.name)
+                      }
+                      className="bg-yellow-600 px-3 py-1 rounded"
+                    >
+                      Rename
+                    </button>
+
+                    <button
                     onClick={() =>
                         deleteFile(file.name)
                     }
@@ -172,5 +263,4 @@ const deleteFile = async (filename) => {
     </div>
   );
 }
-
 export default ProjectDetails;

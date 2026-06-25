@@ -1,7 +1,5 @@
 from fastapi import Header
-
 from app.auth.jwt_handler import verify_token
-
 
 def get_current_user(
     authorization: str = Header(None)
@@ -14,4 +12,8 @@ def get_current_user(
         ""
     )
 
-    return verify_token(token)
+    user = verify_token(token)
+
+    print("Current User:", user)
+
+    return user
