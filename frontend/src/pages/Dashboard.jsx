@@ -173,23 +173,33 @@ const saveProjectEdit = async () => {
 
   return (
     <div className="min-h-screen bg-black text-white p-10">
-      <h1 className="text-4xl font-bold mb-6">
-        Dashboard
-      </h1>
+     <div className="mb-10">
+        <h1 className="text-5xl font-extrabold tracking-wide">
+          🚀 Nav3D Dashboard
+        </h1>
+
+        <p className="text-gray-400 mt-2 text-lg">
+          Welcome back! Manage your AI & 3D projects from one place.
+        </p>
+      </div>
 
       {user ? (
         <div className="border border-gray-800 rounded-xl p-6">
-          <h2 className="text-2xl mb-4">
-            Welcome 👋
-          </h2>
+          <div className="bg-gradient-to-r from-blue-600 to-purple-700 rounded-2xl p-8 mb-8 shadow-xl">
 
-          <p className="mb-2">
-            User ID: {user.user_id}
-          </p>
+            <h2 className="text-3xl font-bold">
+              👋 Welcome Back
+            </h2>
 
-          <p className="mb-6">
-            Email: {user.email}
-          </p>
+            <p className="mt-3 text-blue-100">
+              Logged in as
+            </p>
+
+            <p className="text-2xl font-semibold mt-1">
+              {user.email}
+            </p>
+
+          </div>
         <div className="mb-6">
           <input
             type="text"
@@ -199,15 +209,6 @@ const saveProjectEdit = async () => {
               setProjectName(e.target.value)
             }
             className="bg-gray-900 p-3 rounded mr-3"
-          />
-
-          <input
-            type="text"
-            placeholder="Project Description"
-            value={description}
-            onChange={(e) =>
-              setDescription(e.target.value)
-            }
           />
 
           <textarea
@@ -227,27 +228,32 @@ const saveProjectEdit = async () => {
           </button>
         </div>
 
-            <div className="grid grid-cols-2 gap-4 mb-6">
-              <div className="bg-gray-900 p-5 rounded-xl">
-                <h2 className="text-lg font-bold">
-                  📁 Total Projects
-                </h2>
-
-                <p className="text-3xl mt-2">
-                  {totalProjects}
-                </p>
-              </div>
-
-              <div className="bg-gray-900 p-5 rounded-xl">
-                <h2 className="text-lg font-bold">
-                  📄 Total Files
-                </h2>
-
-                <p className="text-3xl mt-2">
-                  {totalFiles}
-                </p>
-              </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+            <div className="bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700 rounded-2xl p-6 shadow-xl hover:scale-105 transition">
+              <p className="text-gray-400">
+                📁 Projects
+              </p>
+              <h2 className="text-5xl font-bold text-blue-400 mt-3">
+                {totalProjects}
+              </h2>
             </div>
+            <div className="bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700 rounded-2xl p-6 shadow-xl hover:scale-105 transition">
+              <p className="text-gray-400">
+                📄 Files
+              </p>
+              <h2 className="text-5xl font-bold text-green-400 mt-3">
+                {totalFiles}
+              </h2>
+            </div>
+            <div className="bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700 rounded-2xl p-6 shadow-xl hover:scale-105 transition">
+              <p className="text-gray-400">
+                💾 Storage
+              </p>
+              <h2 className="text-5xl font-bold text-yellow-400 mt-3">
+                {(totalFiles * 2).toFixed(0)} MB
+              </h2>
+            </div>
+          </div>
 
           <h3 className="text-xl mt-6 mb-3">
             My Projects
@@ -271,30 +277,58 @@ const saveProjectEdit = async () => {
 
             <div
               key={project.id}
-              className="border border-gray-700 rounded-xl p-5 bg-gray-900"
-            >
-             <h3 className="text-xl font-bold mb-2">
-                📁 {project.name} (ID: {project.id})
-              </h3>
+             className="bg-gradient-to-br from-gray-900 to-gray-800
+                border border-gray-700
+                rounded-3xl
+                p-6
+                shadow-xl
+                hover:shadow-blue-500/20
+                hover:scale-[1.03]
+                transition-all
+                duration-300"
+                            >
+             <div className="flex justify-between items-center">
 
-              <p className="text-gray-400 mt-2">
-                {project.description}
+                <h3 className="text-2xl font-bold">
+                  📁 {project.name}
+                </h3>
+
+                <span className="bg-blue-600 px-3 py-1 rounded-full text-sm">
+                  #{project.id}
+                </span>
+
+              </div>
+
+              <p className="text-gray-300 mt-4 leading-relaxed min-h-[60px]">
+
+                {project.description
+                  ? project.description
+                  : "No description added yet."}
+
               </p>
 
               <p className="text-gray-400 text-sm mb-2">
                 Project ID: {project.id}
               </p>
 
-              <p className="text-blue-400 text-sm mb-4">
-                📄 Files: {project.file_count || 0}
-              </p>
+              <div className="flex justify-between items-center mt-5">
 
-              <div className="flex gap-2 flex-wrap">
+                <span className="text-green-400">
+                  📄 {project.file_count || 0} Files
+                </span>
+
+                <span className="text-yellow-400">
+                  ⭐ Active
+                </span>
+
+              </div>
+
+              <div className="flex gap-3 justify-center mt-6">
                 <button
                   onClick={() =>
                     navigate(`/projects/${project.id}`)
                   }
-                  className="bg-green-600 px-3 py-1 rounded"
+                  className="bg-green-600 hover:bg-green-700 px-5 py-2 rounded-xl transition"
                 >
                   Open
                 </button>
@@ -303,14 +337,14 @@ const saveProjectEdit = async () => {
                   onClick={() =>
                     deleteProject(project.id)
                   }
-                  className="bg-red-600 px-3 py-1 rounded"
+                 className="bg-red-600 hover:bg-red-700 px-5 py-2 rounded-xl transition"
                 >
                   Delete
                 </button>
 
                 <button
                   onClick={() => openEditProject(project)}
-                  className="bg-blue-600 px-3 py-1 rounded"
+                className="bg-blue-600 hover:bg-blue-700 px-5 py-2 rounded-xl transition"
                 >
                   Edit
                 </button>
