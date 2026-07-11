@@ -13,42 +13,45 @@ import uuid
 router = APIRouter()
 
 
+from fastapi import HTTPException
+
 @router.get("/projects")
 def get_projects(
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user)
 ):
+    if current_user is None:
+        raise HTTPException(
+            status_code=401,
+            detail="Not authenticated"
+        )
+
     projects = db.query(Project).filter(
-    Project.owner_id == current_user["user_id"]
+        Project.owner_id == current_user["user_id"]
     ).all()
 
     result = []
 
     for project in projects:
-     upload_dir = os.path.join(
-        "uploads",
-        f"project_{project.id}"
-    )
-
-    file_count = 0
-
-    if os.path.exists(upload_dir):
-        file_count = len(
-            os.listdir(upload_dir)
+        upload_dir = os.path.join(
+            "uploads",
+            f"project_{project.id}"
         )
 
-    result.append(
-    {
-        "id": project.id,
-        "name": project.name,
-        "description": project.description,
-        "owner_id": project.owner_id,
-        "file_count": file_count
-    }
-)
+        file_count = 0
+
+        if os.path.exists(upload_dir):
+            file_count = len(os.listdir(upload_dir))
+
+        result.append({
+            "id": project.id,
+            "name": project.name,
+            "description": project.description,
+            "owner_id": project.owner_id,
+            "file_count": file_count
+        })
+
     return result
-
-
 @router.post("/projects")
 def create_project(
     project: ProjectCreate,
