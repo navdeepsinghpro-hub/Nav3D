@@ -53,6 +53,7 @@ const projectsResponse = await fetch(
 
 const projectsData = await projectsResponse.json();
 
+console.log(projectsData);
 setProjects(projectsData);
       } catch (error) {
         console.error(error);
@@ -270,8 +271,8 @@ const saveProjectEdit = async () => {
               key={project.id}
               className="border border-gray-700 rounded-xl p-5 bg-gray-900"
             >
-              <h3 className="text-xl font-bold mb-2">
-                📁 {project.name}
+             <h3 className="text-xl font-bold mb-2">
+                📁 {project.name} (ID: {project.id})
               </h3>
 
               <p className="text-gray-400 mt-2">
@@ -295,45 +296,6 @@ const saveProjectEdit = async () => {
                 >
                   Open
                 </button>
-                  {editingProject === project.id && (
-                    <div className="border border-gray-700 p-4 rounded mt-6">
-                      <h3 className="text-xl mb-3">
-                        Edit Project
-                      </h3>
-
-                      <input
-                        type="text"
-                        value={editName}
-                        onChange={(e) =>
-                          setEditName(e.target.value)
-                        }
-                        className="w-full p-3 rounded text-black mb-3"
-                        placeholder="Project Name"
-                      />
-
-                      <textarea
-                        value={editDescription}
-                        onChange={(e) =>
-                          setEditDescription(e.target.value)
-                        }
-                        className="w-full p-3 rounded text-black mb-3"
-                        placeholder="Project Description"
-                      />
-
-                      <button
-                        onClick={saveProjectEdit}
-                        className="bg-green-600 px-4 py-2 rounded"
-                      >
-                        Save Changes
-                      </button>
-                    </div>
-                  )}
-                <button
-                  onClick={() => openEditProject(project)}
-                  className="bg-blue-600 px-3 py-1 rounded"
-                >
-                  Edit
-                </button>
 
                 <button
                   onClick={() =>
@@ -343,6 +305,43 @@ const saveProjectEdit = async () => {
                 >
                   Delete
                 </button>
+
+                <button
+                  onClick={() => openEditProject(project)}
+                  className="bg-blue-600 px-3 py-1 rounded"
+                >
+                  Edit
+                </button>
+
+                {editingProject === project.id && (
+                  <div className="border border-gray-700 p-4 rounded mt-6">
+                    <h3 className="text-xl mb-3">
+                      Edit Project
+                    </h3>
+
+                    <input
+                      type="text"
+                      value={editName}
+                      onChange={(e) => setEditName(e.target.value)}
+                      className="w-full p-3 rounded text-black mb-3"
+                      placeholder="Project Name"
+                    />
+
+                    <textarea
+                      value={editDescription}
+                      onChange={(e) => setEditDescription(e.target.value)}
+                      className="w-full p-3 rounded text-black mb-3"
+                      placeholder="Project Description"
+                    />
+
+                    <button
+                      onClick={saveProjectEdit}
+                      className="bg-green-600 px-4 py-2 rounded"
+                    >
+                      Save Changes
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           ))}
