@@ -226,24 +226,28 @@ def get_project_files(
         "message": "Project deleted"
     }
 
-@router.delete("/files/{filename}")
-def delete_file(filename: str):
-    import os
-
+@router.delete("/projects/{project_id}/files/{filename}")
+def delete_file(
+    project_id: int,
+    filename: str,
+    current_user=Depends(get_current_user),
+):
     file_path = os.path.join(
         "uploads",
+        f"project_{project_id}",
         filename
     )
 
     if not os.path.exists(file_path):
-        return {
-            "message": "File not found"
-        }
+        raise HTTPException(
+            status_code=404,
+            detail="File not found"
+        )
 
     os.remove(file_path)
 
     return {
-        "message": "File deleted"
+        "message": "File deleted successfully"
     }
 
 @router.get(

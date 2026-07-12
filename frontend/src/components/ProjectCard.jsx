@@ -82,15 +82,6 @@ function ProjectCard({
 
      </div>
 
-      <UploadPanel
-        projectId={project.id}
-        onUpload={() => window.location.reload()}
-      />
-
-      <FileList
-        projectId={project.id}
-      />
-
       {editingProject === project.id && (
         <div className="border border-gray-700 rounded-xl p-4 mt-6">
 

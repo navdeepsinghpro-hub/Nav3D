@@ -90,45 +90,97 @@ const [progress, setProgress] = useState(0);
 
 const deleteFile = async (filename) => {
   try {
-    await fetch(
-      `http://127.0.0.1:8000/files/${filename}`,
+    const token = localStorage.getItem("token");
+
+    const response = await fetch(
+    `http://127.0.0.1:8000/projects/${id}/files/${filename}`,
       {
         method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       }
     );
 
-    setFiles(
-      files.filter(
-        (file) => file.name !== filename
-      )
-    );
-  } catch (error) {
-    console.error(error);
+    console.log("Status:", response.status);
+
+    const result = await response.text();
+    console.log("Response:", result);
+
+    if (!response.ok) {
+      alert("Delete failed");
+      return;
+    }
+
+    setFiles(files.filter((file) => file.name !== filename));
+    window.location.reload();
+
+    alert("✅ File Deleted");
+  } catch (err) {
+    console.error(err);
   }
 };
 
   return (
     <div className="min-h-screen bg-black text-white p-10">
-      <h1 className="text-4xl font-bold mb-6">
-        Project Details
-      </h1>
+     <div className="mb-10">
 
-      <div className="border border-gray-800 rounded-xl p-6">
-        <p>
-          Project ID: {project.id}
+        <h1 className="text-5xl font-extrabold">
+          🚀 Project Workspace
+        </h1>
+
+        <p className="text-gray-400 mt-2">
+          Manage your files, models and AI assets.
         </p>
 
-      <p>
-        Project Name: {project.name?.replace("Name: ", "")}
-      </p>
+      </div>
 
-      <p>
-        Description: {project.description?.replace("Description: ", "")}
-      </p>
+      <div className="bg-gray-900 rounded-3xl p-8 shadow-2xl border border-gray-700">
+        <div className="mb-8">
 
-        <p>
-          Owner ID: {project.owner_id}
+  <h2 className="text-3xl font-bold">
+    📁 {project.name}
+  </h2>
+
+        <p className="text-gray-400 mt-2">
+          {project.description || "No description"}
         </p>
+
+      </div>
+
+      <div className="grid grid-cols-3 gap-6 mb-10">
+
+        <div className="bg-gray-800 rounded-2xl p-5">
+          <p className="text-gray-400">
+            Files
+          </p>
+
+          <h2 className="text-4xl font-bold text-blue-400">
+            {files.length}
+          </h2>
+        </div>
+
+        <div className="bg-gray-800 rounded-2xl p-5">
+          <p className="text-gray-400">
+            Owner
+          </p>
+
+          <h2 className="text-2xl text-green-400">
+            You
+          </h2>
+          </div>
+
+        <div className="bg-gray-800 rounded-2xl p-5">
+          <p className="text-gray-400">
+            Storage
+          </p>
+
+          <h2 className="text-2xl text-green-400">
+            {(files.reduce((a,b)=>a+b.size,0)/1024/1024).toFixed(2)} MB
+          </h2>
+        </div>
+
+      </div>
 
        <div className="mt-6">
         <div

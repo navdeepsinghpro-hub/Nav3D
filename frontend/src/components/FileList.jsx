@@ -36,52 +36,47 @@ function FileList({ projectId }) {
           No files uploaded
         </p>
       ) : (
-        files.map((file, index) => (
+        
+       <div className="bg-gray-800 rounded-xl p-4">
 
-             <div
-                key={index}
-                className="bg-gray-800 rounded-xl p-3 mb-3 flex items-center justify-between"
-                >
+          {/* First image only */}
+          <img
+            src={`http://127.0.0.1:8000/uploads/project_${projectId}/${files[0].name}`}
+            alt={files[0].name}
+            className="w-full h-40 object-cover rounded-xl"
+          />
 
-                <div className="flex items-center gap-4">
+          <h3 className="font-bold mt-4 truncate">
+            {files[0].name}
+          </h3>
 
-                    <img
-                    src={`http://127.0.0.1:8000/uploads/project_${projectId}/${file.name}`}
-                    alt={file.name}
-                    className="w-20 h-20 rounded-lg object-cover"
-                    />
+          <p className="text-gray-400">
+            {(files[0].size / 1024).toFixed(2)} KB
+          </p>
 
-                    <div>
-                    <h3 className="font-bold">
-                        {file.name}
-                    </h3>
+          {files.length > 1 && (
+            <p className="text-blue-400 mt-2">
+              +{files.length - 1} more files
+            </p>
+          )}
 
-                    <p className="text-gray-400">
-                        {(file.size/1024).toFixed(2)} KB
-                    </p>
-                    </div>
+          <div className="flex gap-2 mt-4">
 
-                </div>
+            <button className="flex-1 bg-blue-600 hover:bg-blue-700 p-2 rounded-xl">
+              👁 Preview
+            </button>
 
-                <div className="flex gap-2">
+            <button className="flex-1 bg-green-600 hover:bg-green-700 p-2 rounded-xl">
+              ⬇ Download
+            </button>
 
-                    <button className="bg-blue-600 px-3 py-2 rounded-lg">
-                    👁
-                    </button>
+            <button className="flex-1 bg-red-600 hover:bg-red-700 p-2 rounded-xl">
+              🗑 Delete
+            </button>
 
-                    <button className="bg-green-600 px-3 py-2 rounded-lg">
-                    ⬇
-                    </button>
+          </div>
 
-                    <button className="bg-red-600 px-3 py-2 rounded-lg">
-                    🗑
-                    </button>
-
-                </div>
-
-                </div>
-            
-        ))
+        </div>
       )}
 
     </div>
