@@ -9,6 +9,7 @@ from fastapi import UploadFile, File
 import os
 from fastapi.responses import FileResponse
 import uuid
+import shutil
 
 router = APIRouter()
 
@@ -302,3 +303,43 @@ def rename_file(
     return {
         "message": "File renamed"
     }
+
+@router.post("/projects/{project_id}/upload")
+def upload_file(
+    project_id: int,
+    file: UploadFile = File(...),
+    current_user=Depends(get_current_user),
+):
+    upload_folder = f"uploads/project_{project_id}"
+
+    os.makedirs(upload_folder, exist_ok=True)
+
+    file_path = os.path.join(upload_folder, file.filename)
+
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+
+    return {
+        "message": "File uploaded successfully",
+        "filename": file.filename
+    }
+
+@router.get("/projects/{project_id}/files")
+def get_project_files(
+    project_id: int,
+    current_user=Depends(get_current_user),
+):
+    folder = f"uploads/project_{project_id}"
+
+    if not os.path.exists(folder):
+        return []
+
+    files = []
+
+    for file in os.listdir(folder):
+        files.append({
+            "name": file,
+            "size": os.path.getsize(os.path.join(folder, file))
+        })
+
+    return files

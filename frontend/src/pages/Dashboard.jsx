@@ -1,69 +1,77 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+import Sidebar from "../components/Sidebar";
+import StatsCards from "../components/StatsCards";
+import ProjectCard from "../components/ProjectCard";
+import ProjectForm from "../components/ProjectForm";
+import SearchSort from "../components/SearchSort";
+
 function Dashboard() {
+  const navigate = useNavigate();
+
   const [user, setUser] = useState(null);
   const [projects, setProjects] = useState([]);
+
   const [projectName, setProjectName] = useState("");
   const [description, setDescription] = useState("");
-  const [sortOrder, setSortOrder] = useState("asc");
-  const totalProjects = projects.length;
 
-  const totalFiles = projects.reduce(
-    (sum, project) =>
-      sum + (project.file_count || 0),
-    0
-  );
   const [search, setSearch] = useState("");
-  const navigate = useNavigate();
+  const [sortOrder, setSortOrder] = useState("asc");
+
   const [editingProject, setEditingProject] = useState(null);
   const [editName, setEditName] = useState("");
   const [editDescription, setEditDescription] = useState("");
 
+  const totalProjects = projects.length;
+
+  const totalFiles = projects.reduce(
+    (sum, project) => sum + (project.file_count || 0),
+    0
+  );
+
   useEffect(() => {
-    const fetchUser = async () => {
-      const token = localStorage.getItem("token");
+    fetchDashboard();
+  }, []);
 
-      if (!token) {
-        navigate("/login");
-        return;
-      }
+  const fetchDashboard = async () => {
+    const token = localStorage.getItem("token");
 
-      try {
-        const response = await fetch(
-          "http://127.0.0.1:8000/me",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+    if (!token) {
+      navigate("/login");
+      return;
+    }
 
-       const data = await response.json();
-setUser(data);
+    try {
+      const userResponse = await fetch(
+        "http://127.0.0.1:8000/me",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-console.log("Token:", token);
+      const userData = await userResponse.json();
+      setUser(userData);
 
-const projectsResponse = await fetch(
-  "http://127.0.0.1:8000/projects",
-  {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  }
-);
+      const projectsResponse = await fetch(
+        "http://127.0.0.1:8000/projects",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-const projectsData = await projectsResponse.json();
+      const projectsData = await projectsResponse.json();
 
-console.log(projectsData);
-setProjects(projectsData);
-      } catch (error) {
-        console.error(error);
-      }
-    };
+      setProjects(projectsData);
 
-    fetchUser();
-  }, [navigate]);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -71,358 +79,203 @@ setProjects(projectsData);
   };
 
   const createProject = async () => {
-  if (!projectName.trim()) return;
+    if (!projectName.trim()) return;
 
-  try {
-    const response = await fetch(
-      "http://127.0.0.1:8000/projects",
-      {
-        method: "POST",
-       headers: {
-  "Content-Type": "application/json",
-  Authorization: `Bearer ${localStorage.getItem("token")}`,
-},
-        body: JSON.stringify({
-          name: projectName,
-          description: description,
-        }),
-      }
-    );
+    try {
+      const response = await fetch(
+        "http://127.0.0.1:8000/projects",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify({
+            name: projectName,
+            description,
+          }),
+        }
+      );
 
-const newProject = await response.json();
+      if (!response.ok) return;
 
-setProjects([
-  ...projects,
-  {
-    id: newProject.project_id,
-    name: newProject.name,
-    description: description,
-    file_count: 0,
-  },
-]);
+      await fetchDashboard();
 
-    setProjectName("");
-    setDescription("");
-  } catch (error) {
-    console.error(error);
-  }
-};
+      setProjectName("");
+      setDescription("");
 
-const deleteProject = async (id) => {
-  try {
-    await fetch(
-  `http://127.0.0.1:8000/projects/${id}`,
-  {
-    method: "DELETE",
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
-    },
-  }
-);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
-    setProjects(
-      projects.filter(
-        (project) => project.id !== id
-      )
-    );
-  } catch (error) {
-    console.error(error);
-  }
-};
+  const deleteProject = async (id) => {
+    try {
+      await fetch(
+        `http://127.0.0.1:8000/projects/${id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
 
-const openEditProject = (project) => {
-  setEditingProject(project.id);
-  setEditName(project.name);
-  setEditDescription(project.description || "");
-};
+      setProjects(
+        projects.filter(
+          (project) => project.id !== id
+        )
+      );
 
-const saveProjectEdit = async () => {
-  try {
-    await fetch(
-      `http://127.0.0.1:8000/projects/${editingProject}`,
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify({
-          name: editName,
-          description: editDescription,
-        }),
-      }
-    );
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
-    setProjects(
-      projects.map((project) =>
-        project.id === editingProject
-          ? {
-              ...project,
-              name: editName,
-              description: editDescription,
-            }
-          : project
-      )
-    );
+  const openEditProject = (project) => {
+    setEditingProject(project.id);
+    setEditName(project.name);
+    setEditDescription(project.description || "");
+  };
 
-    setEditingProject(null);
-  } catch (error) {
-    console.error(error);
-  }
-};
+  const saveProjectEdit = async () => {
+    try {
 
+      await fetch(
+        `http://127.0.0.1:8000/projects/${editingProject}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify({
+            name: editName,
+            description: editDescription,
+          }),
+        }
+      );
+
+      await fetchDashboard();
+
+      setEditingProject(null);
+
+    } catch (error) {
+      console.error(error);
+    }
+  };
   return (
-    <div className="min-h-screen bg-black text-white p-10">
-     <div className="mb-10">
-        <h1 className="text-5xl font-extrabold tracking-wide">
-          🚀 Nav3D Dashboard
-        </h1>
+    <div className="min-h-screen bg-black text-white flex">
 
-        <p className="text-gray-400 mt-2 text-lg">
-          Welcome back! Manage your AI & 3D projects from one place.
-        </p>
-      </div>
+      <Sidebar />
 
-      {user ? (
-        <div className="border border-gray-800 rounded-xl p-6">
-          <div className="bg-gradient-to-r from-blue-600 to-purple-700 rounded-2xl p-8 mb-8 shadow-xl">
+      <div className="flex-1 p-10 overflow-y-auto">
 
-            <h2 className="text-3xl font-bold">
-              👋 Welcome Back
+        <div className="mb-10">
+
+          <h1 className="text-5xl font-extrabold">
+            🚀 Nav3D Dashboard
+          </h1>
+
+          <p className="text-gray-400 mt-3">
+            Manage your AI & 3D projects from one place.
+          </p>
+
+        </div>
+
+        {user ? (
+          <>
+
+            <div className="bg-gradient-to-r from-blue-600 to-purple-700 rounded-2xl p-8 mb-8 shadow-xl">
+
+              <h2 className="text-3xl font-bold">
+                👋 Welcome Back
+              </h2>
+
+              <p className="mt-3 text-blue-100">
+                Logged in as
+              </p>
+
+              <p className="text-2xl font-semibold mt-1">
+                {user.email}
+              </p>
+
+            </div>
+
+            <ProjectForm
+              projectName={projectName}
+              setProjectName={setProjectName}
+              description={description}
+              setDescription={setDescription}
+              createProject={createProject}
+            />
+
+            <StatsCards
+              totalProjects={totalProjects}
+              totalFiles={totalFiles}
+            />
+
+            <SearchSort
+              search={search}
+              setSearch={setSearch}
+              sortOrder={sortOrder}
+              setSortOrder={setSortOrder}
+            />
+
+            <h2 className="text-2xl font-bold mb-6">
+              📁 My Projects
             </h2>
 
-            <p className="mt-3 text-blue-100">
-              Logged in as
-            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
 
-            <p className="text-2xl font-semibold mt-1">
-              {user.email}
-            </p>
+              {projects
+                .filter((project) =>
+                  project.name
+                    .toLowerCase()
+                    .includes(search.toLowerCase())
+                )
+                .sort((a, b) =>
+                  sortOrder === "asc"
+                    ? a.name.localeCompare(b.name)
+                    : b.name.localeCompare(a.name)
+                )
+                .map((project) => (
+                  <ProjectCard
+                    key={project.id}
+                    project={project}
+                    deleteProject={deleteProject}
+                    openEditProject={openEditProject}
+                    editingProject={editingProject}
+                    editName={editName}
+                    editDescription={editDescription}
+                    setEditName={setEditName}
+                    setEditDescription={setEditDescription}
+                    saveProjectEdit={saveProjectEdit}
+                  />
+                ))}
 
+            </div>
+
+            <div className="mt-10">
+
+              <button
+                onClick={handleLogout}
+                className="bg-red-600 hover:bg-red-700 px-6 py-3 rounded-xl transition"
+              >
+                Logout
+              </button>
+
+            </div>
+
+          </>
+        ) : (
+          <div className="text-center text-xl">
+            Loading...
           </div>
-        <div className="mb-6">
-          <input
-            type="text"
-            placeholder="Project Name"
-            value={projectName}
-            onChange={(e) =>
-              setProjectName(e.target.value)
-            }
-            className="bg-gray-900 p-3 rounded mr-3"
-          />
+        )}
 
-          <textarea
-            value={description}
-            onChange={(e) =>
-              setDescription(e.target.value)
-            }
-            placeholder="Project description"
-            className="w-full p-3 rounded text-black mt-3"
-          />
+      </div>
 
-          <button
-            onClick={createProject}
-            className="bg-white text-black px-4 py-3 rounded"
-          >
-            Create Project
-          </button>
-        </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-            <div className="bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700 rounded-2xl p-6 shadow-xl hover:scale-105 transition">
-              <p className="text-gray-400">
-                📁 Projects
-              </p>
-              <h2 className="text-5xl font-bold text-blue-400 mt-3">
-                {totalProjects}
-              </h2>
-            </div>
-            <div className="bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700 rounded-2xl p-6 shadow-xl hover:scale-105 transition">
-              <p className="text-gray-400">
-                📄 Files
-              </p>
-              <h2 className="text-5xl font-bold text-green-400 mt-3">
-                {totalFiles}
-              </h2>
-            </div>
-            <div className="bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700 rounded-2xl p-6 shadow-xl hover:scale-105 transition">
-              <p className="text-gray-400">
-                💾 Storage
-              </p>
-              <h2 className="text-5xl font-bold text-yellow-400 mt-3">
-                {(totalFiles * 2).toFixed(0)} MB
-              </h2>
-            </div>
-          </div>
-
-          <h3 className="text-xl mt-6 mb-3">
-            My Projects
-          </h3>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {projects
-          .filter((project) =>
-            project.name
-              .toLowerCase()
-              .includes(
-                search.toLowerCase()
-              )
-          )
-          .sort((a, b) =>
-            sortOrder === "asc"
-              ? a.name.localeCompare(b.name)
-              : b.name.localeCompare(a.name)
-          )
-          .map((project) => (
-
-            <div
-              key={project.id}
-             className="bg-gradient-to-br from-gray-900 to-gray-800
-                border border-gray-700
-                rounded-3xl
-                p-6
-                shadow-xl
-                hover:shadow-blue-500/20
-                hover:scale-[1.03]
-                transition-all
-                duration-300"
-                            >
-             <div className="flex justify-between items-center">
-
-                <h3 className="text-2xl font-bold">
-                  📁 {project.name}
-                </h3>
-
-                <span className="bg-blue-600 px-3 py-1 rounded-full text-sm">
-                  #{project.id}
-                </span>
-
-              </div>
-
-              <p className="text-gray-300 mt-4 leading-relaxed min-h-[60px]">
-
-                {project.description
-                  ? project.description
-                  : "No description added yet."}
-
-              </p>
-
-              <p className="text-gray-400 text-sm mb-2">
-                Project ID: {project.id}
-              </p>
-
-              <div className="flex justify-between items-center mt-5">
-
-                <span className="text-green-400">
-                  📄 {project.file_count || 0} Files
-                </span>
-
-                <span className="text-yellow-400">
-                  ⭐ Active
-                </span>
-
-              </div>
-
-              <div className="flex gap-3 justify-center mt-6">
-                <button
-                  onClick={() =>
-                    navigate(`/projects/${project.id}`)
-                  }
-                  className="bg-green-600 hover:bg-green-700 px-5 py-2 rounded-xl transition"
-                >
-                  Open
-                </button>
-
-                <button
-                  onClick={() =>
-                    deleteProject(project.id)
-                  }
-                 className="bg-red-600 hover:bg-red-700 px-5 py-2 rounded-xl transition"
-                >
-                  Delete
-                </button>
-
-                <button
-                  onClick={() => openEditProject(project)}
-                className="bg-blue-600 hover:bg-blue-700 px-5 py-2 rounded-xl transition"
-                >
-                  Edit
-                </button>
-
-                {editingProject === project.id && (
-                  <div className="border border-gray-700 p-4 rounded mt-6">
-                    <h3 className="text-xl mb-3">
-                      Edit Project
-                    </h3>
-
-                    <input
-                      type="text"
-                      value={editName}
-                      onChange={(e) => setEditName(e.target.value)}
-                      className="w-full p-3 rounded text-black mb-3"
-                      placeholder="Project Name"
-                    />
-
-                    <textarea
-                      value={editDescription}
-                      onChange={(e) => setEditDescription(e.target.value)}
-                      className="w-full p-3 rounded text-black mb-3"
-                      placeholder="Project Description"
-                    />
-
-                    <button
-                      onClick={saveProjectEdit}
-                      className="bg-green-600 px-4 py-2 rounded"
-                    >
-                      Save Changes
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div className="mb-4">
-          <select
-            value={sortOrder}
-            onChange={(e) =>
-              setSortOrder(e.target.value)
-            }
-            className="bg-gray-900 border border-gray-700 p-3 rounded"
-          >
-            <option value="asc">
-              A → Z
-            </option>
-
-            <option value="desc">
-              Z → A
-            </option>
-          </select>
-        </div>
-
-        <div className="mb-6">
-          <input
-            type="text"
-            placeholder="Search Projects..."
-            value={search}
-            onChange={(e) =>
-              setSearch(e.target.value)
-            }
-            className="bg-gray-900 border border-gray-700 p-3 rounded w-full"
-          />
-        </div>
-
-          <button
-            onClick={handleLogout}
-            className="bg-white text-black px-4 py-2 rounded"
-          >
-            Logout
-          </button>
-        </div>
-      ) : (
-        <p>Loading...</p>
-      )}
     </div>
   );
 }
