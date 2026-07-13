@@ -10,6 +10,8 @@ import os
 from fastapi.responses import FileResponse
 import uuid
 import shutil
+from app.models.scene import SceneObject
+from app.schemas.scene import SceneObjectData
 
 router = APIRouter()
 
@@ -347,3 +349,25 @@ def get_project_files(
         })
 
     return files
+
+@router.post("/projects/{project_id}/scene")
+def save_scene(
+    project_id: int,
+    scene: list,
+):
+    import json
+    import os
+
+    folder = f"uploads/project_{project_id}"
+
+    os.makedirs(folder, exist_ok=True)
+
+    with open(
+        os.path.join(folder, "scene.json"),
+        "w"
+    ) as f:
+        json.dump(scene, f)
+
+    return {
+        "message": "Scene Saved"
+    }

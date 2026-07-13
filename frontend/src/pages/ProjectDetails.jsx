@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
+import ModelViewer from "../components/ModelViewer";
 
 function ProjectDetails() {
   const { id } = useParams();
@@ -10,6 +11,7 @@ const [file, setFile] = useState(null);
 const [files, setFiles] = useState([]);
 const [dragging, setDragging] = useState(false);
 const [progress, setProgress] = useState(0);
+const [selectedModel, setSelectedModel] = useState(null);
 
   useEffect(() => {
  const fetchProject = async () => {
@@ -35,6 +37,16 @@ const [progress, setProgress] = useState(0);
   const filesData = await filesResponse.json();
 
   setFiles(filesData);
+
+  const firstModel = filesData.find(
+  (file) =>
+    file.name.endsWith(".glb") ||
+    file.name.endsWith(".gltf")
+);
+
+if (firstModel) {
+  setSelectedModel(firstModel.name);
+}
 };
     fetchProject();
   }, [id]);
@@ -120,6 +132,53 @@ const deleteFile = async (filename) => {
     console.error(err);
   }
 };
+
+const getFileIcon = (name) => {
+  const ext = name.split(".").pop().toLowerCase();
+
+  if (["glb", "gltf", "fbx", "obj"].includes(ext))
+    return "🧊";
+
+  if (["png","jpg","jpeg","gif","webp"].includes(ext))
+    return "🖼";
+
+  if (["mp4","mov","avi"].includes(ext))
+    return "🎥";
+
+  if (["mp3","wav"].includes(ext))
+    return "🎵";
+
+  if (["pdf"].includes(ext))
+    return "📄";
+
+  if (["zip","rar"].includes(ext))
+    return "🗜";
+
+  return "📁";
+};
+
+const getFileType = (name) => {
+  const ext = name.split(".").pop().toLowerCase();
+
+  if (["glb","gltf","fbx","obj"].includes(ext))
+    return "3D Model";
+
+  if (["png","jpg","jpeg","gif","webp"].includes(ext))
+    return "Image";
+
+  if (["mp4","mov","avi"].includes(ext))
+    return "Video";
+
+  if (["mp3","wav"].includes(ext))
+    return "Audio";
+
+  if (["pdf"].includes(ext))
+    return "PDF";
+
+  return "File";
+};
+
+
 
   return (
     <div className="min-h-screen bg-black text-white p-10">
@@ -253,63 +312,121 @@ const deleteFile = async (filename) => {
             </p>
           </div>
         )}
+
+          <div className="mt-10">
+            <h2 className="text-2xl font-bold mb-4">
+              🧊 3D Viewer
+            </h2>
+
+              <ModelViewer
+                modelUrl={
+                  selectedModel
+                    ? `http://127.0.0.1:8000/uploads/project_${id}/${selectedModel}`
+                    : null
+                }
+              />
+          </div>
+
           <h2 className="text-xl mt-6 mb-3">
              Uploaded Files
           </h2>
 
-          <ul>
-            {files.map((file, index) => (
-                <li
-                key={index}
-                className="mb-6"
-                >
-                <img
-                    src={`http://127.0.0.1:8000/uploads/project_${id}/${file.name}`}
-                    alt={file.name}
-                    className="w-40 rounded border"
-                />
 
-                <div className="flex items-center gap-3 mt-2">
-                    <div>
-                    <p>{file.name}</p>
+          <div className="grid md:grid-cols-2 gap-5">
 
-                    <p className="text-sm text-gray-400">
-                        {(file.size / 1024).toFixed(2)} KB
-                    </p>
-                    </div>
+            {files.map((file,index)=>(
 
-                    <button
-                    onClick={() =>
-                        window.open(
-                        `http://127.0.0.1:8000/projects/${id}/download/${file.name}`
-                        )
-                    }
-                    className="bg-green-600 px-3 py-1 rounded"
-                    >
-                    Download
-                    </button>
+            <div
+              key={index}
+              onClick={() => {
+                if (
+                  file.name.endsWith(".glb") ||
+                  file.name.endsWith(".gltf")
+                ) {
+                  setSelectedModel(file.name);
+                }
+              }}
+              className={`
+                bg-gray-800
+                rounded-2xl
+                p-5
+                border
+                cursor-pointer
+                transition
 
-                    <button
-                      onClick={() =>
-                        renameFile(file.name)
-                      }
-                      className="bg-yellow-600 px-3 py-1 rounded"
-                    >
-                      Rename
-                    </button>
+                ${
+                  selectedModel === file.name
+                    ? "border-blue-500 bg-gray-700"
+                    : "border-gray-700 hover:border-blue-400"
+                }
+              `}
+            >
 
-                    <button
-                    onClick={() =>
-                        deleteFile(file.name)
-                    }
-                    className="bg-red-600 px-3 py-1 rounded"
-                    >
-                    Delete
-                    </button>
-                </div>
-                </li>
+            <div className="flex items-center gap-4">
+
+            <div className="text-5xl">
+            {getFileIcon(file.name)}
+            </div>
+
+            <div>
+
+            <h2 className="font-bold text-lg break-all">
+            {file.name}
+            </h2>
+
+            <p className="text-gray-400">
+            {getFileType(file.name)}
+            </p>
+
+            <p className="text-green-400">
+            {(file.size/1024).toFixed(2)} KB
+            </p>
+
+            </div>
+
+            </div>
+
+            <div className="flex gap-3 mt-5">
+
+            <button
+            onClick={()=>window.open(
+            `http://127.0.0.1:8000/projects/${id}/download/${file.name}`
+            )}
+            className="bg-blue-600 px-4 py-2 rounded-xl"
+            >
+            👁
+            </button>
+
+            <button
+            onClick={()=>window.open(
+            `http://127.0.0.1:8000/projects/${id}/download/${file.name}`
+            )}
+            className="bg-green-600 px-4 py-2 rounded-xl"
+            >
+            ⬇
+            </button>
+
+            <button
+            onClick={()=>renameFile(file.name)}
+            className="bg-yellow-600 px-4 py-2 rounded-xl"
+            >
+            ✏️
+            </button>
+
+            <button
+            onClick={()=>deleteFile(file.name)}
+            className="bg-red-600 px-4 py-2 rounded-xl"
+            >
+            🗑
+            </button>
+
+            </div>
+
+            </div>
+
             ))}
-            </ul>
+
+            </div>
         </div>
       </div>
     </div>

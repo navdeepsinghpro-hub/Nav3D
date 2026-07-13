@@ -8,6 +8,13 @@ from app.routes.user import router as user_router
 from app.models.project import Project
 from app.routes.projects import router as projects_router
 from fastapi.staticfiles import StaticFiles
+from app.models.project import Project
+from app.models.user import User
+from app.models.scene import SceneObject
+from app.routes.files import router as files_router
+from app.routes.scene import router as scene_router
+app.include_router(files_router)
+app.include_router(scene_router)
 
 Base.metadata.create_all(bind=engine)
 
