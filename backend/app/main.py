@@ -13,8 +13,7 @@ from app.models.user import User
 from app.models.scene import SceneObject
 from app.routes.files import router as files_router
 from app.routes.scene import router as scene_router
-app.include_router(files_router)
-app.include_router(scene_router)
+
 
 Base.metadata.create_all(bind=engine)
 
@@ -39,6 +38,8 @@ app.add_middleware(
 app.include_router(auth_router)
 app.include_router(user_router)
 app.include_router(projects_router)
+app.include_router(files_router)
+app.include_router(scene_router)
 
 
 @app.get("/")

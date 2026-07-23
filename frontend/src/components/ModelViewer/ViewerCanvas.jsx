@@ -15,11 +15,12 @@ export default function ViewerCanvas({ modelUrl }) {
       <SceneLights />
 
       {modelUrl && (
-        <Model
-          url={modelUrl}
-          orbit={orbit}
-        />
-      )}
+  <Model
+    key={modelUrl}
+    url={modelUrl}
+    orbit={orbit}
+  />
+)}
 
       <OrbitControls ref={orbit} />
 
